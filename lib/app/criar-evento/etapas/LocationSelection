@@ -1,0 +1,155 @@
+'use client'
+
+import { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Home, Users, TreesIcon as Tree, Music, Beer, Utensils, Wifi, HelpCircle, MapPin } from 'lucide-react'
+
+interface LocationOption {
+  id: string
+  label: string
+  icon: string
+  needsAddress?: boolean
+  needsName?: boolean
+  needsCustom?: boolean
+}
+
+const locationOptions: LocationOption[] = [
+  { id: 'minha-casa', label: 'Na minha casa', icon: 'house', needsAddress: true },
+  { id: 'casa-amigos', label: 'Na casa do(s)', icon: 'friends-house', needsAddress: true },
+  { id: 'parque', label: 'Parque', icon: 'park', needsName: true },
+  { id: 'balada', label: 'Balada', icon: 'party', needsName: true },
+  { id: 'bar', label: 'Bar', icon: 'bar', needsName: true },
+  { id: 'restaurante', label: 'Restaurante', icon: 'restaurant', needsName: true },
+  { id: 'online', label: 'Online', icon: 'online' },
+  { id: 'nao-sei', label: 'Ainda não sei', icon: 'question' },
+  { id: 'outro', label: 'Outro...', icon: 'other', needsCustom: true },
+]
+
+interface LocationSelectionProps {
+  onLocationSelect: (location: { type: string; details?: string; address?: string }) => void
+}
+
+export function LocationSelection({ onLocationSelect }: LocationSelectionProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [currentOption, setCurrentOption] = useState<LocationOption | null>(null)
+  const [details, setDetails] = useState('')
+  const [address, setAddress] = useState('')
+
+  const handleLocationClick = (option: LocationOption) => {
+    setCurrentOption(option)
+    setDetails('')
+    setAddress('')
+    if (option.needsAddress || option.needsName || option.needsCustom) {
+      setIsModalOpen(true)
+    } else {
+      onLocationSelect({ type: option.id })
+    }
+  }
+
+  const handleSave = () => {
+    if (currentOption) {
+      onLocationSelect({
+        type: currentOption.id,
+        details: details || undefined,
+        address: address || undefined,
+      })
+    }
+    setIsModalOpen(false)
+  }
+
+  const LocationIcon = ({ type }: { type: string }) => {
+    switch (type) {
+      case 'house':
+        return <Home className="w-8 h-8" />
+      case 'friends-house':
+        return <Users className="w-8 h-8" />
+      case 'park':
+        return <Tree className="w-8 h-8" />
+      case 'party':
+        return <Music className="w-8 h-8" />
+      case 'bar':
+        return <Beer className="w-8 h-8" />
+      case 'restaurant':
+        return <Utensils className="w-8 h-8" />
+      case 'online':
+        return <Wifi className="w-8 h-8" />
+      case 'question':
+        return <HelpCircle className="w-8 h-8" />
+      case 'other':
+        return <MapPin className="w-8 h-8" />
+      default:
+        return <MapPin className="w-8 h-8" />
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center space-y-2">
+        <h2 className="text-xl font-bold">
+          Já tem uma sugestão de lugar?
+        </h2>
+        <p className="text-gray-600">
+          Caso tenha, isso pode ajudar seus convidados a decidirem qual dia eles poderão ir
+        </p>
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        {locationOptions.map((option) => (
+          <button
+            key={option.id}
+            onClick={() => handleLocationClick(option)}
+            className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-black hover:bg-gray-50 bg-white"
+          >
+            <LocationIcon type={option.icon} />
+            <span className="text-sm">{option.label}</span>
+          </button>
+        ))}
+      </div>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{currentOption?.needsAddress ? 'Qual o endereço?' : 'Qual o nome do local?'}</DialogTitle>
+            {currentOption?.needsAddress && (
+              <DialogDescription>
+                Só quem receber o link poderá ver.
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            {(currentOption?.needsName || currentOption?.needsCustom) && (
+              <div className="space-y-2">
+                <Label htmlFor="details">Nome do local</Label>
+                <Input
+                  id="details"
+                  value={details}
+                  onChange={(e) => setDetails(e.target.value)}
+                  placeholder={`Digite o nome ${currentOption?.needsCustom ? 'do lugar' : 'do ' + currentOption?.label.toLowerCase()}`}
+                />
+              </div>
+            )}
+            {(currentOption?.needsAddress || currentOption?.needsCustom) && (
+              <div className="space-y-2">
+                <Label htmlFor="address">Endereço</Label>
+                <Input
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Digite o endereço"
+                />
+              </div>
+            )}
+            <Button
+              onClick={handleSave}
+              className="w-full"
+            >
+              Salvar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
