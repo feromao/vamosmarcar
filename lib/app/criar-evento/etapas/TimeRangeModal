@@ -1,0 +1,71 @@
+import { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+interface TimeRangeModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSave: (start: string, end: string) => void
+}
+
+export default function TimeRangeModal({ isOpen, onClose, onSave }: TimeRangeModalProps) {
+  const [startTime, setStartTime] = useState('00:00')
+  const [endTime, setEndTime] = useState('00:00')
+
+  const timeOptions = Array.from({ length: 24 * 4 }, (_, i) => {
+    const hours = Math.floor(i / 4)
+    const minutes = (i % 4) * 15
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+  })
+
+  const handleSave = () => {
+    onSave(startTime, endTime)
+    onClose()
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Selecione o horário</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 items-center gap-4">
+            <Label htmlFor="start-time">Início</Label>
+            <Select value={startTime} onValueChange={setStartTime}>
+              <SelectTrigger id="start-time">
+                <SelectValue placeholder="Selecione o horário de início" />
+              </SelectTrigger>
+              <SelectContent>
+                {timeOptions.map((time) => (
+                  <SelectItem key={time} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 items-center gap-4">
+            <Label htmlFor="end-time">Fim</Label>
+            <Select value={endTime} onValueChange={setEndTime}>
+              <SelectTrigger id="end-time">
+                <SelectValue placeholder="Selecione o horário de fim" />
+              </SelectTrigger>
+              <SelectContent>
+                {timeOptions.map((time) => (
+                  <SelectItem key={time} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <Button onClick={handleSave}>Salvar</Button>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
