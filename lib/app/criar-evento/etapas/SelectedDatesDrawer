@@ -1,0 +1,50 @@
+import { X } from 'lucide-react'
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+
+interface DateSelection {
+  date: Date;
+  time?: string;
+}
+
+interface SelectedDatesDrawerProps {
+  selections: DateSelection[]
+  onRemove: (date: Date) => void
+}
+
+export function SelectedDatesDrawer({ selections, onRemove }: SelectedDatesDrawerProps) {
+  if (selections.length === 0) return null
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t-2 border-black shadow-lg">
+      <div className="max-w-lg mx-auto">
+        <div className="flex flex-wrap gap-2">
+          {selections.map(({ date, time }) => (
+            <div 
+              key={date.toISOString()} 
+              className="flex flex-col items-center bg-white rounded-lg border-2 border-black p-2"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">
+                  {format(date, "d/MMM", { locale: ptBR }).toLowerCase()}
+                </span>
+                <button
+                  onClick={() => onRemove(date)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {time && (
+                <span className="text-xs text-blue-600 mt-1">
+                  {time}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
